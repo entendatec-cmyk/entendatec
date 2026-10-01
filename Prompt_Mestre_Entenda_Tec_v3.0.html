@@ -1,0 +1,2499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Mestre — Entenda Tec v3.0</title>
+<meta name="theme-color" content="#0a1628">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prompt Mestre">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+:root {
+  --bg: #070f1a;
+  --bg2: #0b1526;
+  --panel: #0f1c30;
+  --panel2: #132338;
+  --border: #1e334f;
+  --border2: #274066;
+  --text: #e8eef8;
+  --muted: #8ba0bd;
+  --blue: #3b82f6;
+  --blue2: #2563eb;
+  --blue-glow: rgba(59,130,246,.35);
+  --ok: #22c55e;
+  --sidebar-w: 220px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 10% 0%, #122544 0%, var(--bg) 55%);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14px;
+}
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+/* Top bar */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: linear-gradient(180deg, #0e1a2e, #0b1524);
+  border-bottom: 1px solid var(--border);
+}
+.topbar .logo-sm {
+  width: 32px; height: 32px; border-radius: 8px; object-fit: cover;
+  border: 1px solid var(--border2);
+}
+.topbar .title { font-weight: 800; font-size: 15px; letter-spacing: .2px; }
+.topbar .ver {
+  font-size: 11px; font-weight: 700; color: #93c5fd;
+  background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.35);
+  padding: 2px 8px; border-radius: 999px;
+}
+.topbar .spacer { flex: 1; }
+.topbar button {
+  background: rgba(255,255,255,.06); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 7px 12px; font-weight: 700; font-size: 12px; cursor: pointer;
+}
+.topbar button:hover { background: rgba(59,130,246,.15); border-color: var(--blue); }
+
+/* Sidebar */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  overflow: auto;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  color: var(--muted); font-weight: 600; font-size: 13px;
+  cursor: pointer; border: 1px solid transparent; user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,.04); color: var(--text); }
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(59,130,246,.25), rgba(37,99,235,.12));
+  color: #fff; border-color: rgba(59,130,246,.35);
+}
+.nav-item .ico { width: 18px; text-align: center; opacity: .9; }
+
+/* Main workspace */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(340px, 420px) 1fr;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.form-panel, .out-panel {
+  min-height: 0; overflow: auto;
+  padding: 18px;
+}
+.form-panel {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+.out-panel { background: var(--bg2); }
+
+.section {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.section-h {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; cursor: pointer; user-select: none;
+}
+.section-h h2 {
+  margin: 0; font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; gap: 8px; color: #dbeafe;
+}
+.section-h .chev { color: var(--muted); font-size: 12px; }
+.section.collapsed .section-body { display: none; }
+
+label {
+  display: block; font-weight: 700; font-size: 12px;
+  margin: 12px 0 6px; color: #c7d7ee;
+}
+label .req { color: #60a5fa; }
+.hint { font-weight: 500; color: var(--muted); font-size: 11px; }
+
+input, textarea, select {
+  width: 100%;
+  background: #0a1524;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-glow);
+}
+textarea { min-height: 72px; resize: vertical; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #0a1524;
+  color: var(--muted);
+  user-select: none;
+  transition: .15s;
+}
+.chip:hover { border-color: var(--blue); color: #fff; }
+.chip.active {
+  background: rgba(59,130,246,.2);
+  border-color: #3b82f6;
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.check-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+}
+.check-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--muted);
+  cursor: pointer; padding: 4px 0;
+}
+.check-item input { width: auto; accent-color: var(--blue); }
+.check-item.active, .check-item:has(input:checked) { color: #e2e8f0; font-weight: 600; }
+
+.btn-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.btn {
+  border: 0; border-radius: 10px; padding: 11px 14px;
+  font-weight: 800; cursor: pointer; font-size: 13px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff; flex: 1; box-shadow: 0 8px 24px rgba(37,99,235,.35);
+}
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-ghost {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { color: #fff; border-color: var(--border2); }
+
+.out-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; flex-wrap: wrap;
+}
+.out-head h2 { margin: 0; font-size: 14px; font-weight: 800; flex: 1; }
+.badge {
+  font-size: 11px; font-weight: 800; padding: 5px 9px;
+  border-radius: 999px; background: rgba(34,197,94,.12);
+  color: #4ade80; border: 1px solid rgba(34,197,94,.25);
+}
+.out-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.out-actions button {
+  background: #132338; color: #c7d7ee;
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 7px 10px; font-weight: 700; font-size: 12px; cursor: pointer;
+}
+.out-actions button:hover { border-color: var(--blue); color: #fff; }
+
+.output {
+  white-space: pre-wrap;
+  font: 12.5px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+  background: #07111f;
+  color: #c9d7ee;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  min-height: calc(100vh - 140px);
+  overflow: auto;
+}
+.output .hl { color: #60a5fa; font-weight: 700; }
+
+/* Assistente de produção — resultados organizados */
+.secao-atual {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 4px 9px;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: rgba(59,130,246,.12);
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.result-tabs {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: rgba(7,17,31,.55);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.result-tabs::-webkit-scrollbar {
+  height: 5px;
+}
+
+.result-tabs::-webkit-scrollbar-thumb {
+  background: #29415f;
+  border-radius: 10px;
+}
+
+.result-tab {
+  background: #132338;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: .15s;
+  white-space: nowrap;
+}
+
+.result-tab:hover {
+  color: #fff;
+  border-color: var(--blue);
+  background: rgba(59,130,246,.10);
+}
+
+.result-tab.active {
+  color: #fff;
+  border-color: var(--blue);
+  background: rgba(59,130,246,.20);
+  box-shadow: 0 0 0 1px rgba(59,130,246,.10), 0 3px 10px rgba(0,0,0,.18);
+  transform: translateY(-1px);
+}
+
+.result-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 7px;
+  background: rgba(7,17,31,.42);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+
+.result-toolbar button {
+  background: #132338;
+  color: #c7d7ee;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.result-toolbar button:hover {
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.result-section {
+  display: none;
+}
+
+.result-section.active {
+  display: block;
+}
+
+.result-description {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.result-output {
+  white-space: pre-wrap;
+  font: 12.5px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+  background: #07111f;
+  color: #c9d7ee;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  min-height: calc(100vh - 210px);
+  overflow: auto;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.result-empty {
+  color: var(--muted);
+  font: 13px/1.6 Inter, system-ui, sans-serif;
+  white-space: normal;
+}
+
+@media (max-width: 960px) {
+  .result-output {
+    min-height: 360px;
+  }
+}
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(2,8,18,.75); z-index: 1000;
+  align-items: center; justify-content: center;
+  padding: 16px; backdrop-filter: blur(6px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #0f1c30; color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 18px; max-width: 720px; width: 100%;
+  max-height: 90vh; overflow: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+}
+.modal-head {
+  position: sticky; top: 0; background: #0f1c30;
+  padding: 18px 22px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; z-index: 2;
+}
+.modal-head h2 { margin: 0; font-size: 18px; }
+.modal-close {
+  border: 0; background: #132338; color: #c7d7ee;
+  width: 36px; height: 36px; border-radius: 10px;
+  font-size: 18px; cursor: pointer; font-weight: 800;
+}
+.modal-body { padding: 8px 22px 26px; }
+.modal-body h3 {
+  font-size: 14px; margin: 20px 0 10px; color: #93c5fd;
+  display: flex; align-items: center; gap: 8px;
+}
+.modal-body h3 .n {
+  background: var(--blue); color: #fff; width: 24px; height: 24px;
+  border-radius: 50%; display: inline-flex; align-items: center;
+  justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.modal-body p, .modal-body li { font-size: 13.5px; line-height: 1.55; color: #b6c6dc; }
+.modal-body ul, .modal-body ol { padding-left: 20px; margin: 8px 0; }
+.modal-body .box {
+  background: #0a1524; border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; margin: 10px 0; font-size: 13px;
+}
+.modal-body .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.modal-body .tool {
+  background: #0a1524; border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px; font-size: 13px; color: #b6c6dc;
+}
+.modal-body .tool b { display: block; margin-bottom: 4px; color: #93c5fd; }
+.modal-body .tip {
+  background: rgba(34,197,94,.08); border-left: 3px solid var(--ok);
+  padding: 10px 12px; border-radius: 0 10px 10px 0; margin: 12px 0; font-size: 13px; color: #bbf7d0;
+}
+
+.panel-view { display: none; }
+.panel-view.active { display: block; }
+
+@media (max-width: 960px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: 56px auto 1fr; height: auto; max-height: none; overflow: visible; }
+  .sidebar { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--border); }
+  .workspace { grid-template-columns: 1fr; }
+  .form-panel { border-right: 0; }
+  .output { min-height: 420px; }
+  .modal-body .tools { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <img class="logo-sm" src="data:image/jpeg;base64,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" alt="Entenda Tec">
+    <div class="title">Prompt Mestre — Entenda Tec</div>
+    <span class="ver">v3.0</span>
+    <div class="spacer"></div>
+    <button type="button" onclick="abrirAjuda()">❓ Como usar</button>
+    <button type="button" onclick="baixarHtml()">⬇️ Baixar este app</button>
+    <button type="button" id="btnInstall" style="display:none" onclick="instalarApp()">📲 Instalar app</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="nav-item active" data-panel="projeto" onclick="navTo(this)">
+      <span class="ico">🎬</span> Projeto
+    </div>
+    <div class="nav-item" data-panel="estilo" onclick="navTo(this)">
+      <span class="ico">🎨</span> Estilo Visual
+    </div>
+    <div class="nav-item" data-panel="roteiro" onclick="navTo(this)">
+      <span class="ico">📝</span> Roteiro
+    </div>
+    <div class="nav-item" data-panel="config" onclick="navTo(this)">
+      <span class="ico">⚙️</span> Configurações
+    </div>
+    <div class="nav-item" data-panel="ajuda-nav" onclick="abrirAjuda()">
+      <span class="ico">❓</span> Ajuda
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <div class="form-panel">
+      <!-- PROJETO -->
+      <div class="panel-view active" id="panel-projeto">
+        <div class="section">
+          <div class="section-h" onclick="this.parentElement.classList.toggle('collapsed')">
+            <h2>1. Informações do Vídeo</h2><span class="chev">▾</span>
+          </div>
+          <div class="section-body">
+            <label>Tema do vídeo <span class="req">*</span></label>
+            <input id="tema" placeholder="Ex.: Como funciona um servidor NAS">
+            <label>Objetivo <span class="req">*</span></label>
+            <textarea id="objetivo" placeholder="Ex.: Explicar para iniciantes como um NAS armazena e disponibiliza arquivos."></textarea>
+            <div class="row">
+              <div>
+                <label>Tempo total</label>
+                <select id="total">
+                  <option value="3 minutos" selected>3 minutos</option>
+                  <option value="5 minutos">5 minutos</option>
+                  <option value="10 minutos">10 minutos</option>
+                  <option value="15 minutos">15 minutos</option>
+                </select>
+              </div>
+              <div>
+                <label>Tempo por cena</label>
+                <select id="cena">
+                  <option value="4 segundos">4 segundos</option>
+                  <option value="6 segundos">6 segundos</option>
+                  <option value="8 segundos" selected>8 segundos</option>
+                  <option value="10 segundos">10 segundos</option>
+                </select>
+              </div>
+            </div>
+            <label>Nível do público</label>
+            <select id="nivel">
+              <option>Iniciante</option>
+              <option>Intermediário</option>
+              <option>Avançado</option>
+              <option>Misto</option>
+            </select>
+            <label>Tom narrativo <span class="hint">(selecione quantos quiser)</span></label>
+            <div class="chips multi" id="tom">
+              <span class="chip active">Didático</span>
+              <span class="chip">Curioso</span>
+              <span class="chip">Investigativo</span>
+              <span class="chip">Surpreendente</span>
+              <span class="chip">Documental</span>
+              <span class="chip">Inspirador</span>
+              <span class="chip">Prático</span>
+              <span class="chip">Humorístico</span>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" type="button" onclick="limparForm()">Limpar formulário</button>
+          <button class="btn btn-primary" type="button" onclick="gerar()">✨ Gerar Prompt Mestre</button>
+        </div>
+      </div>
+
+      <!-- ESTILO -->
+      <div class="panel-view" id="panel-estilo">
+        <div class="section">
+          <div class="section-h"><h2>2. Estilo do Vídeo</h2></div>
+          <div class="section-body">
+            <label>Estilo visual <span class="hint">(selecione um ou mais)</span></label>
+            <div class="chips multi" id="estilo">
+              <span class="chip active">Ilustração editorial tecnológica</span>
+              <span class="chip">Realista</span>
+              <span class="chip">Anime</span>
+              <span class="chip">Animação 3D</span>
+              <span class="chip">Minimalista</span>
+              <span class="chip">Cinematográfico</span>
+              <span class="chip">Isométrico</span>
+              <span class="chip">Cyberpunk</span>
+              <span class="chip">Flat design</span>
+              <span class="chip">Motion graphics</span>
+              <span class="chip">Watercolor tech</span>
+              <span class="chip">Neon futurista</span>
+              <span class="chip">Cinematográfico realista</span>
+              <span class="chip">Documentário tecnológico</span>
+              <span class="chip">Profissional corporativo</span>
+              <span class="chip">Animação 2D</span>
+              <span class="chip">Anime cinematográfico</span>
+              <span class="chip">3D realista</span>
+              <span class="chip">Stop Motion</span>
+              <span class="chip">Cartoon</span>
+              <span class="chip">Videogame</span>
+              <span class="chip">Sci-Fi cinematográfico</span>
+              <span class="chip">Thriller tecnológico</span>
+              <span class="chip">Fantasia tecnológica</span>
+              <span class="chip">Retro VHS</span>
+              <span class="chip">Jornalístico</span>
+              <span class="chip">Social Media / Shorts</span>
+              <span class="chip">Film Noir</span>
+              <span class="chip">Futurista</span>
+              <span class="chip">Científico / Laboratório</span>
+              <span class="chip">Industrial</span>
+              <span class="chip">Desenho técnico</span>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" type="button" onclick="gerar()">✨ Gerar Prompt Mestre</button>
+        </div>
+      </div>
+
+      <!-- ROTEIRO -->
+      <div class="panel-view" id="panel-roteiro">
+        <div class="section">
+          <div class="section-h"><h2>3. Informações e Observações</h2></div>
+          <div class="section-body">
+            <label>Informações que obrigatoriamente devem aparecer <span class="hint">(opcional)</span></label>
+            <textarea id="info" placeholder="Especificações, conceitos, etapas, exemplos ou fatos que precisam ser abordados."></textarea>
+            <label>Observações adicionais <span class="hint">(opcional)</span></label>
+            <textarea id="obs" placeholder="Alguma restrição ou orientação específica para este vídeo?"></textarea>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" type="button" onclick="gerar()">✨ Gerar Prompt Mestre</button>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="panel-view" id="panel-config">
+        <div class="section">
+          <div class="section-h"><h2>Configurações</h2></div>
+          <div class="section-body">
+            <p style="color:var(--muted);margin:0 0 12px;font-size:13px;line-height:1.5">
+              Baixe o prompt gerado ou o aplicativo completo. Você pode escolher o nome do arquivo antes de salvar.
+            </p>
+            <div class="btn-row">
+              <button class="btn btn-ghost" type="button" onclick="baixarPrompt()">⬇️ Baixar prompt (.txt)</button>
+              <button class="btn btn-ghost" type="button" onclick="baixarHtml()">⬇️ Baixar este app (.html)</button>
+            </div>
+            <p style="color:var(--muted);margin:16px 0 0;font-size:12px">Versão 3.0 · @entendatec</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="out-panel">
+      <div class="out-head">
+        <h2>📄 Resultado do Projeto <span id="secao-atual" class="secao-atual">Prompt Mestre</span></h2>
+        <span class="badge" id="status">Pronto para gerar</span>
+      </div>
+
+      <div class="result-tabs">
+        <button type="button" class="result-tab active" data-result-tab="mestre" onclick="selecionarResultado('mestre')">📄 Prompt Mestre</button>
+        <button type="button" class="result-tab" data-result-tab="video" onclick="selecionarResultado('video')">🎬 Vídeo</button>
+        <button type="button" class="result-tab" data-result-tab="narracao" onclick="selecionarResultado('narracao')">🎙️ Narração</button>
+        <button type="button" class="result-tab" data-result-tab="imagem" onclick="selecionarResultado('imagem')">🖼️ Imagens</button>
+        <button type="button" class="result-tab" data-result-tab="youtube" onclick="selecionarResultado('youtube')">📺 YouTube</button>
+        <button type="button" class="result-tab" data-result-tab="chatgpt" onclick="selecionarResultado('chatgpt')">🤖 ChatGPT</button>
+      </div>
+
+      <div class="result-toolbar">
+        <button type="button" onclick="copiarResultadoAtual()">📋 Copiar seção</button>
+        <button type="button" onclick="salvarResultadoAtual()">💾 Salvar seção</button>
+        <button type="button" onclick="exportarProjetoCompleto()">📦 Exportar projeto completo</button>
+      </div>
+
+      <div class="result-section active" id="resultado-mestre">
+        <p class="result-description">
+          Este é o Prompt Mestre gerado pelo aplicativo. Use-o como ponto de partida para transformar sua ideia em um pacote completo de produção.
+        </p>
+        <div class="output result-output" id="saida">Preencha o tema e o objetivo e clique em “Gerar Prompt Mestre”.</div>
+      </div>
+
+      <div class="result-section" id="resultado-video">
+        <p class="result-description">
+          Aqui ficará o material de vídeo organizado por cena, pronto para você copiar e levar ao Google Flow ou ferramenta de geração de vídeo.
+        </p>
+        <div class="result-output result-empty" id="saida-video">
+          Gere o Prompt Mestre e depois use a seção ChatGPT para transformar o projeto em prompts completos de vídeo.
+        </div>
+      </div>
+
+      <div class="result-section" id="resultado-narracao">
+        <p class="result-description">
+          Narração separada das descrições visuais, facilitando o uso no Google AI Studio ou em outra ferramenta de voz.
+        </p>
+        <div class="result-output result-empty" id="saida-narracao">
+          A narração será preparada separadamente a partir do projeto.
+        </div>
+      </div>
+
+      <div class="result-section" id="resultado-imagem">
+        <p class="result-description">
+          Prompts de imagens, thumbnails e elementos visuais organizados para facilitar a produção.
+        </p>
+        <div class="result-output result-empty" id="saida-imagem">
+          Os prompts de imagem serão preparados a partir do Prompt Mestre.
+        </div>
+      </div>
+
+      <div class="result-section" id="resultado-youtube">
+        <p class="result-description">
+          Títulos, descrição SEO, hashtags, tags, thumbnail e checklist final para publicação no YouTube.
+        </p>
+        <div class="result-output result-empty" id="saida-youtube">
+          O conteúdo para YouTube será preparado a partir da resposta do ChatGPT.
+        </div>
+      </div>
+
+      <div class="result-section" id="resultado-chatgpt">
+        <p class="result-description">
+          Prompt preparado para colar no ChatGPT e transformar o Prompt Mestre em um pacote completo de produção.
+        </p>
+
+        <div class="result-output result-empty" id="saida-chatgpt">
+          Gere o Prompt Mestre para preparar esta etapa.
+        </div>
+
+        <div class="chatgpt-import">
+          <h3>📥 Resposta do ChatGPT</h3>
+
+          <p class="result-description">
+            Depois de enviar o Prompt para o ChatGPT, copie a resposta completa e cole no campo abaixo.
+          </p>
+
+          <textarea
+            id="resposta-chatgpt"
+            class="chatgpt-response"
+            placeholder="Cole aqui a resposta completa gerada pelo ChatGPT..."
+          ></textarea>
+
+          <div class="chatgpt-actions">
+            <button type="button" onclick="organizarRespostaChatGPT()">
+              🔄 Organizar resposta
+            </button>
+
+            <button type="button" onclick="limparRespostaChatGPT()">
+              🗑️ Limpar resposta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ajuda" onclick="if(event.target===this)fecharAjuda()">
+  <div class="modal" role="dialog" aria-labelledby="ajuda-titulo">
+    <div class="modal-head">
+      <h2 id="ajuda-titulo">❓ Como usar o Entenda Tec</h2>
+      <button class="modal-close" onclick="fecharAjuda()" type="button" aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <p>
+        O <strong>Entenda Tec</strong> é um aplicativo para transformar uma ideia de vídeo
+        tecnológico em um conjunto organizado de prompts para produção audiovisual.
+        Você define o tema, objetivo, estilo visual e demais parâmetros; o aplicativo
+        monta um <strong>Prompt Mestre</strong> detalhado para ser usado em ferramentas
+        de IA e geração de vídeo.
+      </p>
+
+      <div class="tip">
+        <strong>Fluxo completo:</strong>
+        Projeto → Estilo Visual → Roteiro → Configuração → Gerar →
+        IA → Google Flow → Editor de vídeo → YouTube.
+      </div>
+
+      <h3><span class="n">1</span> Conhecendo o aplicativo</h3>
+
+      <p>
+        O aplicativo é organizado em quatro áreas principais:
+      </p>
+
+      <div class="tools">
+        <div class="tool">
+          <b>📁 Projeto</b><br>
+          Onde você define o tema, objetivo, duração, quantidade de cenas,
+          nível do público e informações importantes.
+        </div>
+
+        <div class="tool">
+          <b>🎨 Estilo Visual</b><br>
+          Define a aparência das cenas e permite combinar diferentes estilos
+          visuais de maneira coerente.
+        </div>
+
+        <div class="tool">
+          <b>📝 Roteiro</b><br>
+          Define o tom, abordagem narrativa e orientações que a IA deve seguir
+          ao desenvolver o conteúdo.
+        </div>
+
+        <div class="tool">
+          <b>⚙️ Configuração</b><br>
+          Reúne os parâmetros técnicos utilizados para controlar a geração
+          dos prompts e das cenas.
+        </div>
+      </div>
+
+      <h3><span class="n">2</span> Passo 1 — Projeto</h3>
+
+      <p>Comece pela definição do projeto.</p>
+
+      <ol>
+        <li>
+          <strong>Tema do vídeo</strong> — assunto principal.
+          Exemplo: <em>Como funciona um SSD NVMe?</em>
+        </li>
+        <li>
+          <strong>Objetivo do vídeo</strong> — o que o espectador deve entender
+          ao final.
+        </li>
+        <li>
+          <strong>Tempo total</strong> — duração aproximada do vídeo.
+        </li>
+        <li>
+          <strong>Tempo por cena</strong> — duração máxima planejada para cada clipe.
+        </li>
+        <li>
+          <strong>Nível do público</strong> — iniciante, intermediário, avançado
+          ou misto.
+        </li>
+        <li>
+          <strong>Informações obrigatórias</strong> — fatos, especificações,
+          etapas ou conceitos que não podem ser esquecidos.
+        </li>
+        <li>
+          <strong>Observações</strong> — restrições, preferências ou instruções
+          específicas para o projeto.
+        </li>
+      </ol>
+
+      <div class="box">
+        <strong>💡 Dica:</strong> um objetivo bem definido ajuda a IA a produzir
+        uma explicação mais focada. Use o campo de informações obrigatórias
+        para fornecer dados técnicos que precisam aparecer corretamente.
+      </div>
+
+      <h3><span class="n">3</span> Passo 2 — Estilo Visual</h3>
+
+      <p>
+        Aqui você escolhe como o vídeo deverá parecer visualmente.
+        É possível selecionar <strong>um ou vários estilos</strong>.
+      </p>
+
+      <p>
+        Quando vários estilos são selecionados, o Prompt Mestre orienta a IA
+        a combiná-los em uma linguagem visual única, evitando uma mistura
+        aleatória de características.
+      </p>
+
+      <h4>🎨 Estilos disponíveis</h4>
+
+      <div class="tools">
+
+        <div class="tool">
+          <b>Ilustração editorial tecnológica</b><br>
+          Ilustração de tecnologia sofisticada, didática e cinematográfica,
+          com diagramas e elementos técnicos integrados à cena.
+        </div>
+
+        <div class="tool">
+          <b>Realista</b><br>
+          Aparência fotográfica e cinematográfica, materiais realistas,
+          iluminação natural e profundidade de campo.
+        </div>
+
+        <div class="tool">
+          <b>Anime</b><br>
+          Estética anime com traços definidos, cel-shading e movimentos
+          estilizados.
+        </div>
+
+        <div class="tool">
+          <b>Animação 3D</b><br>
+          Modelagem tridimensional profissional com materiais, iluminação
+          e movimentos de câmera cuidadosamente construídos.
+        </div>
+
+        <div class="tool">
+          <b>Minimalista</b><br>
+          Composição limpa, poucos elementos e foco absoluto na informação
+          principal.
+        </div>
+
+        <div class="tool">
+          <b>Cinematográfico</b><br>
+          Linguagem de cinema com composição dramática, movimentos de câmera
+          e iluminação controlada.
+        </div>
+
+        <div class="tool">
+          <b>Isométrico</b><br>
+          Representação técnica em perspectiva isométrica, excelente para
+          mostrar sistemas e estruturas.
+        </div>
+
+        <div class="tool">
+          <b>Cyberpunk</b><br>
+          Tecnologia futurista, neon, ambientes urbanos e atmosfera de ficção
+          científica.
+        </div>
+
+        <div class="tool">
+          <b>Flat design</b><br>
+          Formas simples, visual limpo e excelente legibilidade para
+          explicações didáticas.
+        </div>
+
+        <div class="tool">
+          <b>Motion graphics</b><br>
+          Elementos gráficos animados, transições, diagramas e movimento
+          visual sincronizado com a explicação.
+        </div>
+
+        <div class="tool">
+          <b>Watercolor tech</b><br>
+          Visual artístico inspirado em aquarela, aplicado a temas tecnológicos.
+        </div>
+
+        <div class="tool">
+          <b>Neon futurista</b><br>
+          Ambientes futuristas com iluminação neon e atmosfera tecnológica.
+        </div>
+
+        <div class="tool">
+          <b>Cinematográfico realista</b><br>
+          Realismo audiovisual com iluminação cinematográfica, lentes,
+          profundidade de campo e movimentos profissionais de câmera.
+        </div>
+
+        <div class="tool">
+          <b>Documentário tecnológico</b><br>
+          Linguagem de documentário premium, com ambientes reais ou realistas
+          e câmera observacional.
+        </div>
+
+        <div class="tool">
+          <b>Profissional corporativo</b><br>
+          Visual elegante e moderno para apresentações, empresas, escritórios,
+          laboratórios e ambientes profissionais.
+        </div>
+
+        <div class="tool">
+          <b>Animação 2D</b><br>
+          Animação bidimensional fluida e didática, adequada para explicar
+          conceitos complexos.
+        </div>
+
+        <div class="tool">
+          <b>Anime cinematográfico</b><br>
+          Anime com qualidade cinematográfica, cenários detalhados,
+          iluminação dramática e composição de filme.
+        </div>
+
+        <div class="tool">
+          <b>3D realista</b><br>
+          Objetos e ambientes tridimensionais com materiais, iluminação,
+          sombras e detalhes fisicamente plausíveis.
+        </div>
+
+        <div class="tool">
+          <b>Stop Motion</b><br>
+          Aparência artesanal, objetos físicos e sensação de animação quadro
+          a quadro.
+        </div>
+
+        <div class="tool">
+          <b>Cartoon</b><br>
+          Visual cartoon moderno, expressivo e acessível, mantendo os conceitos
+          tecnológicos reconhecíveis.
+        </div>
+
+        <div class="tool">
+          <b>Videogame</b><br>
+          Visual inspirado em cinematics de videogames modernos, com ambientes
+          detalhados e câmera dinâmica.
+        </div>
+
+        <div class="tool">
+          <b>Sci-Fi cinematográfico</b><br>
+          Ficção científica de alta qualidade com tecnologia avançada,
+          ambientes futuristas e atmosfera imersiva.
+        </div>
+
+        <div class="tool">
+          <b>Thriller tecnológico</b><br>
+          Atmosfera de investigação e mistério, com iluminação contrastada
+          e linguagem cinematográfica.
+        </div>
+
+        <div class="tool">
+          <b>Fantasia tecnológica</b><br>
+          Combinação de tecnologia com elementos fantásticos em uma linguagem
+          visual coerente.
+        </div>
+
+        <div class="tool">
+          <b>Retro VHS</b><br>
+          Estética audiovisual inspirada nos anos 1980 e 1990, com textura
+          analógica e aparência vintage.
+        </div>
+
+        <div class="tool">
+          <b>Jornalístico</b><br>
+          Linguagem visual de reportagem tecnológica, objetiva, informativa
+          e naturalista.
+        </div>
+
+        <div class="tool">
+          <b>Social Media / Shorts</b><br>
+          Linguagem dinâmica para vídeos curtos, com enquadramentos próximos
+          e ritmo visual mais rápido.
+        </div>
+
+        <div class="tool">
+          <b>Film Noir</b><br>
+          Alto contraste, luz e sombra, atmosfera dramática e linguagem
+          cinematográfica investigativa.
+        </div>
+
+        <div class="tool">
+          <b>Futurista</b><br>
+          Tecnologia avançada, arquitetura moderna e ambientes que representam
+          uma evolução plausível do presente.
+        </div>
+
+        <div class="tool">
+          <b>Científico / Laboratório</b><br>
+          Laboratórios, instrumentos de pesquisa, equipamentos de medição
+          e visual técnico preciso.
+        </div>
+
+        <div class="tool">
+          <b>Industrial</b><br>
+          Fábricas, máquinas, robótica, servidores e infraestrutura tecnológica
+          em escala.
+        </div>
+
+        <div class="tool">
+          <b>Desenho técnico</b><br>
+          Diagramas, cortes, esquemas, vistas explodidas e representação
+          visual inspirada em engenharia.
+        </div>
+
+      </div>
+
+      <div class="box">
+        <strong>🎨 Combinação de estilos:</strong>
+        selecione mais de um estilo quando quiser criar uma identidade visual
+        híbrida. Por exemplo, <strong>Anime cinematográfico + Sci-Fi cinematográfico</strong>
+        pode gerar uma linguagem de ficção científica com estética anime e
+        tratamento cinematográfico.
+      </div>
+
+      <h3><span class="n">4</span> Passo 3 — Roteiro</h3>
+
+      <p>
+        O roteiro define como a informação será apresentada ao espectador.
+        Escolha o <strong>tom</strong> adequado ao assunto e ao público.
+      </p>
+
+      <ul>
+        <li><strong>Didático:</strong> explicação clara e progressiva.</li>
+        <li><strong>Curioso:</strong> prioriza descobertas e perguntas.</li>
+        <li><strong>Investigativo:</strong> apresenta o assunto como uma investigação.</li>
+        <li><strong>Técnico:</strong> maior concentração de detalhes e conceitos.</li>
+        <li><strong>Descontraído:</strong> linguagem mais leve e conversacional.</li>
+      </ul>
+
+      <p>
+        Você pode selecionar múltiplos tons quando quiser uma combinação,
+        desde que eles façam sentido para o assunto.
+      </p>
+
+      <h3><span class="n">5</span> Passo 4 — Configuração</h3>
+
+      <p>
+        As configurações determinam características técnicas da geração.
+        Confira duração, quantidade de cenas, nível de detalhamento e demais
+        parâmetros antes de gerar.
+      </p>
+
+      <div class="tip">
+        <strong>⚠️ Atenção:</strong> quanto menor a duração de cada cena,
+        mais importante é manter apenas uma ação principal por clipe.
+      </div>
+
+      <h3><span class="n">6</span> Gerar o Prompt Mestre</h3>
+
+      <ol>
+        <li>Preencha o tema e o objetivo.</li>
+        <li>Configure os parâmetros do projeto.</li>
+        <li>Escolha o tom e o estilo visual.</li>
+        <li>Clique em <strong>⚡ Gerar Prompt Mestre</strong>.</li>
+        <li>Confira o resultado no painel de saída.</li>
+      </ol>
+
+      <p>
+        O Prompt Mestre reúne as informações necessárias para orientar uma IA
+        na criação do roteiro, cenas, narração, elementos visuais e materiais
+        complementares.
+      </p>
+
+      <h3><span class="n">7</span> Trabalhando com a IA</h3>
+
+      <p>
+        Copie o Prompt Mestre e cole em uma conversa nova no
+        <strong>ChatGPT</strong>, <strong>Grok</strong> ou outra IA compatível.
+      </p>
+
+      <ol>
+        <li>Cole o Prompt Mestre completo.</li>
+        <li>Envie o prompt.</li>
+        <li>Confira as cenas produzidas.</li>
+        <li>Verifique se os fatos técnicos estão corretos.</li>
+        <li>Se necessário, peça à IA para refinar uma cena específica.</li>
+      </ol>
+
+      <div class="box">
+        <strong>Exemplo de refinamento:</strong><br>
+        “Refine a CENA 3 mantendo o mesmo estilo visual, aumentando os detalhes
+        técnicos e deixando a narração mais natural.”
+      </div>
+
+      <h3><span class="n">8</span> Organizar a resposta da IA</h3>
+      <p>
+        Depois de gerar o Prompt Mestre, você deve enviá-lo para uma IA,
+        como o ChatGPT, para que ela produza o roteiro, as cenas,
+        as narrações, os prompts visuais e os demais conteúdos do projeto.
+      </p>
+
+      <div class="help-box">
+        <strong>🔄 Fluxo recomendado</strong>
+        <ol>
+          <li>Gere o <strong>Prompt Mestre</strong> no Entenda Tec.</li>
+          <li>Clique em <strong>📋 Copiar</strong>.</li>
+          <li>Abra o ChatGPT ou outra IA de sua preferência.</li>
+          <li>Cole o Prompt Mestre na conversa.</li>
+          <li>Envie o prompt e aguarde a resposta completa da IA.</li>
+          <li><strong>Copie toda a resposta gerada pela IA.</strong></li>
+          <li>Volte para o Entenda Tec.</li>
+          <li>Localize a área <strong>Organizar resposta da IA</strong>.</li>
+          <li>Cole ali a resposta completa recebida da IA.</li>
+          <li>Clique em <strong>Organizar resposta</strong>.</li>
+        </ol>
+      </div>
+
+      <p>
+        O objetivo dessa etapa é transformar uma resposta longa da IA em
+        partes organizadas e fáceis de utilizar durante a produção do vídeo.
+      </p>
+
+      <h4>📋 O que deve ser colado?</h4>
+      <p>
+        Cole a <strong>resposta completa da IA</strong>, sem apagar as
+        cenas, narrações, títulos ou outras partes do resultado.
+        Quanto mais completa estiver a resposta, melhor será a organização.
+      </p>
+
+      <h4>🧩 O que será organizado?</h4>
+      <ul>
+        <li>🎬 <strong>Prompts de vídeo</strong> — cenas e instruções para o Google Flow;</li>
+        <li>🎙️ <strong>Narração</strong> — textos que serão utilizados na voz do vídeo;</li>
+        <li>🖼️ <strong>Prompts de imagem</strong> — imagens, ilustrações e thumbnails;</li>
+        <li>📺 <strong>Conteúdo para YouTube</strong> — títulos, descrição, hashtags e tags;</li>
+        <li>💬 <strong>Conteúdo adicional da IA</strong> — informações que não se encaixarem nas categorias anteriores.</li>
+      </ul>
+
+      <h4>⚠️ Importante</h4>
+      <p>
+        A organização não deve substituir a revisão humana. Depois de
+        organizar a resposta, confira se todas as cenas estão presentes,
+        se a narração está correta, se os prompts correspondem ao tema
+        e se não houve perda de informações.
+      </p>
+
+      <div class="help-box">
+        <strong>💡 Dica</strong>
+        <p>
+          Se a IA produzir uma resposta muito grande, copie e cole o
+          conteúdo completo. Evite copiar somente uma parte das cenas,
+          pois isso pode deixar o projeto incompleto.
+        </p>
+      </div>
+
+
+
+
+
+      <h3><span class="n">9</span> Gerar as cenas no Google Flow</h3>
+
+      <ol>
+        <li>Abra o Google Flow ou a ferramenta de geração de vídeo utilizada.</li>
+        <li>Localize cada bloco <strong>CENA N</strong> produzido pela IA.</li>
+        <li>Copie o <strong>PROMPT PARA O GOOGLE FLOW</strong>.</li>
+        <li>Cole o prompt na ferramenta de vídeo.</li>
+        <li>Gere o clipe respeitando a duração definida no projeto.</li>
+        <li>Repita o processo para todas as cenas.</li>
+      </ol>
+
+      <div class="tip">
+        <strong>🎬 Boa prática:</strong> mantenha uma ação principal por cena,
+        evite excesso de elementos e preserve o mesmo estilo visual em todos
+        os clipes.
+      </div>
+
+      <h3><span class="n">10</span> Organizar e editar o vídeo</h3>
+
+      <p>
+        Depois de gerar os clipes, coloque-os em um editor de vídeo na ordem
+        correta. Ajuste cortes, narração, música, efeitos, legendas e volume.
+      </p>
+
+      <div class="tools">
+        <div class="tool">
+          <b>🎬 DaVinci Resolve</b><br>
+          Editor profissional disponível para Windows, macOS e Linux.
+        </div>
+
+        <div class="tool">
+          <b>✂️ Shotcut</b><br>
+          Editor gratuito e open source para montagem linear.
+        </div>
+
+        <div class="tool">
+          <b>🖥️ OpenShot</b><br>
+          Alternativa simples para quem está começando.
+        </div>
+
+        <div class="tool">
+          <b>📱 VN / CapCut</b><br>
+          Alternativas práticas para edição rápida em computador ou celular,
+          conforme a plataforma e disponibilidade.
+        </div>
+      </div>
+
+      <h3><span class="n">11</span> Exportar o projeto completo</h3>
+
+      <p>
+        Use <strong>📦 Exportar projeto completo</strong> quando quiser guardar
+        todos os materiais produzidos pelo aplicativo em uma única pasta.
+      </p>
+
+      <p>O projeto exportado reúne:</p>
+
+      <ul>
+        <li><strong>01-prompt-mestre.txt</strong> — Prompt Mestre principal.</li>
+        <li><strong>02-prompts-video.txt</strong> — prompts destinados à geração das cenas.</li>
+        <li><strong>03-narracao.txt</strong> — texto de narração.</li>
+        <li><strong>04-prompts-imagem.txt</strong> — prompts para imagens.</li>
+        <li><strong>05-youtube.txt</strong> — materiais para publicação.</li>
+        <li><strong>06-prompt-chatgpt.txt</strong> — prompt auxiliar para IA.</li>
+        <li><strong>07-aplicativo-EntendaTec.html</strong> — cópia do aplicativo HTML.</li>
+      </ul>
+
+      <div class="box">
+        <strong>📦 Dica:</strong> use a exportação completa para arquivar um projeto
+        e poder consultar novamente todos os prompts e materiais relacionados
+        ao vídeo.
+      </div>
+
+      <h3><span class="n">12</span> Copiar e salvar resultados</h3>
+
+      <ul>
+        <li><strong>📋 Copiar prompt</strong> — copia o conteúdo para a área de transferência.</li>
+        <li><strong>⬇️ Baixar prompt</strong> — salva o texto em um arquivo.</li>
+        <li><strong>📦 Exportar projeto completo</strong> — reúne todos os materiais.</li>
+      </ul>
+
+      <h3><span class="n">13</span> Checklist antes de publicar</h3>
+
+      <ul>
+        <li>☐ Tema e objetivo estão claros.</li>
+        <li>☐ Informações técnicas foram conferidas.</li>
+        <li>☐ Todas as cenas foram geradas.</li>
+        <li>☐ O estilo visual permaneceu consistente.</li>
+        <li>☐ A narração está clara e sincronizada.</li>
+        <li>☐ Os clipes estão na ordem correta.</li>
+        <li>☐ O áudio foi revisado.</li>
+        <li>☐ Título, descrição, hashtags e tags foram revisados.</li>
+        <li>☐ Thumbnail foi preparada.</li>
+        <li>☐ O vídeo final foi assistido antes da publicação.</li>
+      </ul>
+
+      <h3><span class="n">14</span> Boas práticas</h3>
+
+      <ul>
+        <li>Use objetivos específicos em vez de objetivos genéricos.</li>
+        <li>Forneça especificações técnicas importantes no campo de informações obrigatórias.</li>
+        <li>Evite colocar muitas ações diferentes na mesma cena.</li>
+        <li>Mantenha um estilo visual consistente entre as cenas.</li>
+        <li>Revise números, nomes, especificações e afirmações técnicas antes de publicar.</li>
+        <li>Se uma cena ficar confusa, simplifique o prompt antes de tentar adicionar mais elementos.</li>
+        <li>Guarde o projeto exportado para futuras revisões.</li>
+      </ul>
+
+      <h3><span class="n">15</span> Problemas comuns</h3>
+
+      <div class="box">
+        <strong>O botão Gerar não funciona?</strong><br>
+        Confira se os campos obrigatórios, principalmente <strong>Tema</strong>
+        e <strong>Objetivo</strong>, foram preenchidos.
+      </div>
+
+      <div class="box">
+        <strong>A cena ficou genérica?</strong><br>
+        Refinar uma cena específica normalmente é mais eficiente do que pedir
+        para refazer todo o projeto.
+      </div>
+
+      <div class="box">
+        <strong>O vídeo ficou visualmente inconsistente?</strong><br>
+        Verifique se o mesmo estilo visual foi mantido nas cenas e se os prompts
+        não foram modificados de maneira incompatível entre si.
+      </div>
+
+      <div class="tip">
+        <strong>🚀 Fluxo recomendado:</strong>
+        preencher o projeto → escolher estilo → configurar roteiro →
+        gerar Prompt Mestre → enviar para a IA → revisar → gerar cenas →
+        editar os clipes → revisar áudio → preparar thumbnail e publicação.
+      </div>
+
+      <div id="versao-app" style="text-align:center; margin-top:18px; opacity:0.65; font-size:12px;">
+        Entenda Tec • versão <span id="numero-versao">...</span>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+function navTo(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const id = el.getAttribute('data-panel');
+  if (!id || id === 'ajuda-nav') return;
+  document.querySelectorAll('.panel-view').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+}
+function limparForm() {
+  clearTimeout(temporizadorRascunho);
+  try { localStorage.removeItem(CHAVE_RASCUNHO); } catch (erro) {
+    console.error('Não foi possível apagar o rascunho:', erro);
+  }
+  document.getElementById('tema').value = '';
+  document.getElementById('objetivo').value = '';
+  document.getElementById('info').value = '';
+  document.getElementById('obs').value = '';
+  document.getElementById('total').value = '3 minutos';
+  document.getElementById('cena').value = '8 segundos';
+  document.getElementById('nivel').selectedIndex = 0;
+  document.querySelectorAll('#tom .chip').forEach((c,i) => c.classList.toggle('active', i===0));
+  document.querySelectorAll('#estilo .chip').forEach((c,i) => c.classList.toggle('active', i===0));
+  document.getElementById('saida').textContent = 'Preencha o tema e o objetivo e clique em “Gerar Prompt Mestre”.';
+  document.getElementById('status').textContent = 'Pronto para gerar';
+}
+
+// Multi-select chips
+document.querySelectorAll('.chips.multi').forEach(box => {
+  box.addEventListener('click', e => {
+    if (e.target.classList.contains('chip')) {
+      e.target.classList.toggle('active');
+    }
+  });
+});
+
+function v(id) { return document.getElementById(id).value.trim(); }
+
+function selectedChips(id) {
+  return Array.from(document.querySelectorAll('#' + id + ' .chip.active'))
+    .map(c => c.textContent.trim());
+}
+
+function gerar() {
+  if (!v('tema') || !v('objetivo')) {
+    alert('Preencha pelo menos o tema e o objetivo.');
+    return;
+  }
+  const tema = v('tema');
+  const objetivo = v('objetivo');
+  const total = v('total') || 'não especificado';
+  const cena = v('cena') || 'até 10 segundos';
+  const nivel = v('nivel');
+  const info = v('info') || 'Nenhuma informação adicional fornecida.';
+  const obs = v('obs') || 'Nenhuma.';
+  const tons = selectedChips('tom');
+  const estilos = selectedChips('estilo');
+  const tomStr = tons.length ? tons.join(', ') : 'Didático';
+  const estiloStr = estilos.length ? estilos.join(', ') : 'Ilustração editorial tecnológica';
+
+  // Descrição rica de estilo visual
+  const estiloGuides = {
+    'Cinematográfico realista': `
+Visual cinematográfico realista e profissional.
+Iluminação natural ou cinematográfica, materiais e ambientes fisicamente plausíveis.
+Profundidade de campo, lentes cinematográficas, movimentos suaves de câmera e composição de filme.
+Texturas realistas, iluminação volumétrica discreta e aparência de produção audiovisual profissional.
+Priorizar realismo, credibilidade e continuidade visual entre cenas.
+`,
+
+    'Documentário tecnológico': `
+Estética de documentário tecnológico premium.
+Cenas observacionais, ambientes reais ou realistas, equipamentos tecnológicos, laboratórios, servidores e pessoas em situações naturais.
+Câmera com linguagem documental, movimentos discretos, planos de detalhe, planos médios e planos gerais.
+Iluminação naturalista e composição informativa.
+A tecnologia deve parecer real, funcional e plausível.
+`,
+
+    'Profissional corporativo': `
+Visual profissional, elegante e moderno, adequado para apresentações e vídeos corporativos de tecnologia.
+Ambientes de escritório, laboratórios, data centers e espaços profissionais.
+Iluminação limpa, composição organizada, aparência premium e movimentos de câmera discretos.
+Evitar aparência publicitária exagerada.
+Priorizar clareza, credibilidade e sofisticação.
+`,
+
+    'Animação 2D': `
+Animação 2D moderna e fluida.
+Personagens, objetos e elementos tecnológicos desenhados em duas dimensões.
+Movimentos suaves, transições elegantes, composição didática e visual consistente.
+Usar animação para explicar conceitos tecnológicos de maneira clara.
+Evitar aparência infantil quando o tema exigir abordagem profissional.
+`,
+
+    'Anime cinematográfico': `
+Estética de anime cinematográfico de alta qualidade.
+Personagens estilizados, cenários detalhados, iluminação dramática e composição cinematográfica.
+Movimentos expressivos, profundidade visual, efeitos de luz e partículas quando apropriados.
+Manter os objetos tecnológicos reconhecíveis e coerentes.
+Evitar excesso de elementos ou aparência genérica.
+`,
+
+    '3D realista': `
+Animação 3D realista de alta qualidade.
+Objetos tecnológicos com materiais fisicamente plausíveis, iluminação realista, sombras naturais e detalhes precisos.
+Câmera cinematográfica, profundidade de campo e movimentos suaves.
+Ideal para mostrar componentes internos, circuitos, servidores, processadores e mecanismos.
+`,
+
+    'Stop Motion': `
+Estética de stop motion artesanal e cinematográfica.
+Objetos físicos, pequenas imperfeições naturais, movimentos quadro a quadro e sensação tátil.
+Iluminação de estúdio e composição cuidadosamente construída.
+Manter o tema tecnológico compreensível e profissional.
+`,
+
+    'Cartoon': `
+Animação cartoon moderna, expressiva e visualmente dinâmica.
+Formas simplificadas, cores equilibradas, personagens expressivos e movimentos claros.
+Manter os conceitos tecnológicos visualmente reconhecíveis.
+Adequado para explicações leves e acessíveis sem perder precisão.
+`,
+
+    'Videogame': `
+Estética inspirada em cinematics de videogames modernos.
+Ambientes detalhados, iluminação dramática, câmera dinâmica e objetos tecnológicos altamente definidos.
+Movimentos de câmera suaves e sensação de produção de alto orçamento.
+Evitar interface de jogo ou HUD desnecessário, a menos que o tema peça isso.
+`,
+
+    'Sci-Fi cinematográfico': `
+Ficção científica cinematográfica de alta qualidade.
+Tecnologia avançada, ambientes futuristas plausíveis, iluminação volumétrica, hologramas discretos e arquitetura tecnológica.
+Visual grandioso, porém coerente e funcional.
+Câmera cinematográfica e atmosfera imersiva.
+`,
+
+    'Thriller tecnológico': `
+Atmosfera de thriller tecnológico.
+Iluminação contrastada, ambientes escuros ou pouco iluminados, tensão visual e câmera cinematográfica controlada.
+Sensação de investigação, descoberta e mistério.
+Manter o conteúdo tecnológico correto e compreensível, sem exageros.
+`,
+
+    'Fantasia tecnológica': `
+Mistura coerente entre fantasia visual e tecnologia.
+Elementos tecnológicos combinados com ambientes imaginativos, energia visual, iluminação atmosférica e detalhes fantásticos.
+A fusão deve parecer intencional e consistente, nunca uma colagem de estilos.
+`,
+
+    'Retro VHS': `
+Estética audiovisual inspirada em tecnologia e vídeos dos anos 1980 e 1990.
+Textura VHS sutil, granulação, pequenas aberrações analógicas, iluminação retro e equipamentos vintage.
+Preservar a legibilidade das informações e evitar efeitos excessivos.
+`,
+
+    'Jornalístico': `
+Estética de reportagem jornalística tecnológica.
+Câmera objetiva, linguagem visual informativa, ambientes reais ou realistas, entrevistas simuladas apenas quando apropriadas e planos de apoio.
+Composição clara, iluminação naturalista e sensação de cobertura profissional.
+Não transformar a cena em telejornal estático.
+`,
+
+    'Social Media / Shorts': `
+Linguagem visual moderna para vídeos curtos de redes sociais.
+Ritmo visual mais rápido, enquadramentos próximos, movimentos de câmera dinâmicos e composição vertical quando apropriado.
+Manter clareza e uma ação principal por cena.
+Evitar excesso de texto na tela.
+`,
+
+    'Film Noir': `
+Estética cinematográfica noir.
+Alto contraste de luz e sombra, iluminação lateral, atmosferas dramáticas, enquadramentos elegantes e sensação investigativa.
+Paleta visual predominantemente escura, com luzes direcionadas.
+Aplicar o estilo sem prejudicar a compreensão dos elementos tecnológicos.
+`,
+
+    'Futurista': `
+Visual futurista sofisticado.
+Arquitetura tecnológica, interfaces discretas, iluminação moderna, materiais avançados e ambientes limpos.
+Tecnologia deve parecer uma evolução plausível do presente, evitando clichês visuais excessivos.
+`,
+
+    'Científico / Laboratório': `
+Estética científica profissional.
+Laboratórios, microscópios, equipamentos de medição, servidores, bancadas técnicas e ambientes de pesquisa.
+Iluminação limpa, detalhes precisos e composição didática.
+Ideal para explicar processos, experimentos e funcionamento interno de tecnologias.
+`,
+
+    'Industrial': `
+Estética industrial tecnológica.
+Fábricas, servidores, máquinas, linhas de produção, robótica e infraestrutura.
+Materiais metálicos realistas, iluminação industrial e sensação de escala.
+Movimentos de câmera cinematográficos mostrando funcionamento e processos.
+`,
+
+    'Desenho técnico': `
+Visual de desenho técnico e engenharia.
+Linhas precisas, diagramas, cortes técnicos, esquemas, vistas explodidas e representação estruturada de componentes.
+Misturar elementos técnicos com movimento cinematográfico.
+Priorizar clareza e precisão visual.
+`,
+
+    'Ilustração editorial tecnológica': `Estilo principal: “Ilustração editorial tecnológica que ganhou vida”.
+Visual de documentário tecnológico premium, como se uma ilustração de revista de tecnologia moderna ganhasse movimento cinematográfico.
+Características obrigatórias:
+• Ilustração tecnológica de alta fidelidade, traços limpos e elegantes;
+• Fundo claro, suave, com leve gradiente ou textura sutil (nunca poluído);
+• Linhas técnicas finas em tons de azul (#1769e0 / azul elétrico suave);
+• Diagramas, setas, ícones e esquemas integrados organicamente à cena (não flutuando como UI);
+• Elementos gráficos que nascem, se conectam e se transformam junto com a ação;
+• Profundidade de campo suave, com foco seletivo no objeto principal;
+• Movimentos de câmera cinematográficos: slow push-in, orbit suave, tilt revelador, tracking lateral;
+• Variação de planos: geral (estabelecimento), médio (ação), fechado (detalhe técnico), visão isométrica ou em corte quando ajudar a explicar;
+• Paleta limpa: brancos, cinzas claros, azuis técnicos, acentos de cor apenas onde há informação importante;
+• Sensação de “documentário ilustrado de alta qualidade” — profissional, didático e visualmente prazeroso.`,
+
+    'Realista': `Estilo Realista fotográfico/cinematográfico.
+• Iluminação natural ou de estúdio suave, com sombras realistas e reflexos corretos;
+• Texturas materiais fiéis (metal, plástico, vidro, madeira, circuito);
+• Profundidade de campo fotográfica (bokeh suave quando útil);
+• Câmera com movimento orgânico de filmagem real (steadicam, dolly, leve handheld controlado);
+• Cores e contrastes naturais, grading cinematográfico discreto;
+• Evitar look plástico ou CGI genérico — priorizar credibilidade visual.`,
+
+    'Anime': `Estilo Anime tecnológico.
+• Traços limpos e definidos, contornos nítidos;
+• Cores vibrantes porém controladas, com sombreamento em camadas (cel-shading);
+• Expressões e poses estilizadas quando houver personagens;
+• Motion típico de anime: movimentos fluidos, aceleração e desaceleração exageradas, efeitos de velocidade e brilho;
+• Fundos detalhados ou minimalistas conforme a cena, sempre legíveis;
+• Manter legibilidade técnica mesmo com estética anime.`,
+
+    'Animação 3D': `Estilo Animação 3D profissional.
+• Modelagem limpa e bem iluminada, com materiais PBR (metal, plástico, vidro, emborrachado);
+• Iluminação volumétrica, reflexos e oclusão ambiente sutis;
+• Câmera com movimentos fluidos de animação 3D (orbit, crane, push);
+• Possibilidade de explosão de peças, cortes em seção e visualização interna de componentes;
+• Evitar look de render barato — qualidade de produção de animação técnica premium.`,
+
+    'Minimalista': `Estilo Minimalista.
+• Pouquíssimos elementos na tela; muito espaço negativo;
+• Formas geométricas simples, tipografia limpa e hierarquia clara;
+• Paleta restrita (máximo 3–4 cores principais);
+• Animações precisas e econômicas — cada movimento tem propósito;
+• Foco absoluto no conceito: se um elemento não explica, ele não entra.`,
+
+    'Cinematográfico': `Estilo Cinematográfico.
+• Enquadramentos de cinema (regra dos terços, leading lines, frame dentro de frame);
+• Movimentos de câmera elaborados e motivados pela narrativa;
+• Grading de cores sofisticado (teal & orange sutil, ou look documental frio);
+• Uso consciente de luz e sombra para criar drama e legibilidade;
+• Ritmo visual de documentário premium ou filme de divulgação científica.`,
+
+    'Isométrico': `Estilo Isométrico / diagrama 3D.
+• Perspectiva isométrica ou axonometrica consistente;
+• Geometria precisa, como um diagrama técnico animado;
+• Cores sólidas ou levemente sombreadas, legibilidade máxima;
+• Peças que se encaixam, se separam e se conectam de forma clara;
+• Ideal para arquitetura de sistemas, redes e fluxos de dados.`,
+
+    'Cyberpunk': `Estilo Cyberpunk tecnológico.
+• Atmosfera noturna urbana, chuva, névoa ou reflexos molhados;
+• Neon (ciano, magenta, amarelo elétrico) contrastando com sombras profundas;
+• Telas holográficas, interfaces flutuantes e glitches controlados;
+• Sensação de futuro denso e tecnológico, sem perder a legibilidade didática;
+• Evitar excesso de ruído visual — o neon deve destacar a informação, não ofuscá-la.`,
+
+    'Flat design': `Estilo Flat design.
+• Formas planas, cores sólidas, sem gradientes realistas nem sombras pesadas;
+• Ícones e pictogramas claros;
+• Animações 2D simples e elegantes (slide, scale, morph);
+• Hierarquia visual forte por tamanho, cor e posição;
+• Ideal para explicar conceitos abstratos de forma rápida e limpa.`,
+
+    'Motion graphics': `Estilo Motion graphics.
+• Tipografia animada como elemento principal de informação;
+• Formas geométricas, linhas e partículas em movimento coreografado;
+• Transições gráficas (wipe, morph, reveal) entre estados;
+• Ritmo sincronizado com a narração;
+• Visual de vinheta de canal de tecnologia premium.`,
+
+    'Watercolor tech': `Estilo Watercolor tech.
+• Aquarela digital suave misturada com linhas técnicas precisas;
+• Manchas de cor que sugerem energia, dados ou fluxo;
+• Contraste entre o orgânico da aquarela e o rigor das linhas de circuito/esquema;
+• Atmosfera artística e acolhedora, ainda assim clara e didática.`,
+
+    'Neon futurista': `Estilo Neon futurista limpo.
+• Brilhos neon controlados sobre fundo escuro ou semi-escuro;
+• Alto contraste, bordas luminosas, glow sutil;
+• Estética sci-fi limpa (não suja nem excessivamente complexa);
+• Elementos que parecem feitos de luz e energia;
+• Manter sempre a legibilidade do conceito técnico.`
+  };
+
+  // Monta descrição principal + notas dos estilos selecionados
+  let estiloVisualDesc = '';
+  const selectedGuides = estilos.length ? estilos : ['Ilustração editorial tecnológica'];
+  const primary = selectedGuides[0];
+  estiloVisualDesc = estiloGuides[primary] || estiloGuides['Ilustração editorial tecnológica'];
+
+  const extras = selectedGuides.slice(1).filter(s => estiloGuides[s]);
+  let notasEstiloTxt = '';
+  if (extras.length) {
+    notasEstiloTxt = '\n\nEstilos adicionais a combinar de forma coerente:\n' +
+      extras.map(s => estiloGuides[s]).join('\n\n');
+  }
+  // Se o principal não for o editorial e o usuário também marcou editorial, já está coberto
+  if (!selectedGuides.includes('Ilustração editorial tecnológica') && selectedGuides.length > 0) {
+    // adiciona instrução de fusão
+    estiloVisualDesc += `\n\nDireção geral: fundir os estilos selecionados (${estiloStr}) em uma linguagem visual única, coerente e profissional, sem colagem genérica. Priorize legibilidade didática e movimento cinematográfico.`;
+  }
+
+  const prompt = `PROMPT MESTRE v3.0 — CRIAÇÃO DE VÍDEO DO CANAL ENTENDA TEC
+
+Você atuará como roteirista, diretor visual e engenheiro de prompts para criação de vídeos tecnológicos do canal brasileiro Entenda Tec (@entendatec).
+
+OBJETIVO GERAL
+Transformar o tema técnico abaixo em um vídeo cinematográfico, didático, visualmente interessante e adequado para geração no Google Flow.
+
+1. TEMA DO VÍDEO
+TEMA: ${tema}
+OBJETIVO: ${objetivo}
+PÚBLICO: Pessoas interessadas em tecnologia, informática, Linux, inteligência artificial, redes, servidores, automação residencial e soluções práticas.
+NÍVEL DO PÚBLICO: ${nivel}
+TOM NARRATIVO: ${tomStr}
+ESTILO DE GERAÇÃO DE VÍDEO: ${estiloStr}
+TEMPO TOTAL: ${total}
+TEMPO POR CENA: ${cena}
+
+INFORMAÇÕES OBRIGATÓRIAS A CONSIDERAR:
+${info}
+
+OBSERVAÇÕES ADICIONAIS:
+${obs}
+
+2. ESTRUTURA DA NARRATIVA
+Quando fizer sentido, siga esta sequência:
+1. Curiosidade ou problema inicial;
+2. Apresentação do cenário;
+3. Investigação;
+4. Explicação visual do funcionamento;
+5. Demonstração do processo;
+6. Consequências práticas;
+7. Cuidados e limitações;
+8. Revelação ou conclusão final.
+
+Não produza resumo convencional, apresentação de slides ou sequência de telas estáticas. O vídeo deve parecer um documentário tecnológico ilustrado, com movimento, transformação e progressão visual.
+
+3. ESTILO VISUAL
+${estiloVisualDesc}${notasEstiloTxt}
+
+Princípios visuais obrigatórios em todas as cenas:
+• A imagem deve ACrescentar informação à narração — nunca apenas decorar.
+• Sempre que houver processo, mostrar a transformação visual: entrada → processamento → resultado; problema → configuração → funcionamento; sensor → rede → sistema → ação; componente → conexão → consequência.
+• Preferir movimento contínuo e progressão clara a cortes estáticos.
+• Evitar repetir a mesma composição, o mesmo ângulo ou o mesmo fundo em cenas consecutivas.
+• Manter hierarquia visual: um foco principal por cena, secundários discretos.
+• Quando usar diagramas ou setas, integrá-los à cena (não sobrepor como HUD genérico).
+• Qualidade final: visual limpo, profissional, legível em tela de celular e em tela grande.
+
+4. REGRAS DE PRECISÃO
+• Não invente especificações técnicas.
+• Não invente números, comandos, telas, marcas, logotipos ou funcionalidades.
+• Não apresente como real algo que não foi confirmado.
+• Não crie interfaces de software sem necessidade.
+• Não exiba comandos ou configurações incorretas.
+• Utilize somente informações tecnicamente coerentes.
+• Quando um detalhe não puder ser confirmado, represente-o de forma genérica e visualmente segura.
+• Diferencie claramente computadores, notebooks, servidores, celulares, tablets, sensores, roteadores e outros equipamentos.
+• Quando a palavra “notebook” aparecer, represente um computador portátil real, com tela, teclado, touchpad, dobradiças e estrutura típica de laptop; nunca um caderno de papel.
+
+5. IDIOMA OBRIGATÓRIO
+Toda a narração deve estar exclusivamente em português brasileiro (pt-BR).
+Todos os textos visíveis devem estar exclusivamente em português brasileiro.
+Não utilizar inglês, espanhol ou qualquer outro idioma.
+Não inserir palavras estrangeiras na imagem.
+Utilizar pronúncia natural do Brasil.
+Se não for possível gerar textos corretamente, não inserir texto na imagem; transmitir a informação por objetos, ações, símbolos e elementos visuais.
+
+6. FORMATO DE CADA CENA
+Para cada cena, apresente um prompt completo, independente e pronto para copiar e colar no Google Flow.
+
+Use exatamente:
+CENA [NÚMERO]
+Duração: [tempo da cena]
+Objetivo da cena: [função na narrativa]
+
+PROMPT PARA O GOOGLE FLOW:
+Crie um vídeo cinematográfico de [duração], no estilo visual definido abaixo, para o canal brasileiro Entenda Tec.
+Estilo visual obrigatório: ${estiloStr}.
+Tema da cena: [foco principal da cena]
+Ambiente: [local, objetos, superfícies e iluminação — descreva de forma concreta]
+Ação principal: [uma única ação clara e progressiva que acontece durante a cena]
+Informação visual: [o que o espectador deve entender só de olhar — transformação, fluxo, conexão ou detalhe técnico]
+Câmera: [enquadramento inicial → movimento (push-in / orbit / tracking / tilt) → enquadramento final]
+Estética e luz: [paleta, textura, profundidade de campo e mood alinhados ao estilo ${estiloStr}]
+Narração obrigatória: “[texto da narração em português brasileiro, sincronizado com a ação]”
+Idioma obrigatório: A narração e todos os textos visíveis devem estar exclusivamente em português brasileiro (pt-BR). Não utilizar inglês, espanhol ou qualquer outro idioma. Se não for possível gerar texto corretamente, não inserir texto algum na imagem.
+Áudio: Voz natural, clara, didática e profissional, com pronúncia brasileira. A narração deve acompanhar o ritmo da ação visual.
+
+NÃO CRIAR:
+• Não transformar a cena em slide;
+• Não inserir listas desnecessárias;
+• Não criar textos em outros idiomas;
+• Não inventar marcas, logotipos, telas ou funcionalidades;
+• Não incluir elementos sem relação com a cena;
+• Não alterar o objeto principal descrito no prompt.
+
+7. COMPATIBILIDADE COM GOOGLE FLOW
+Os prompts devem ser claros, diretos, visualmente objetivos, fáceis de interpretar, sem excesso de elementos simultâneos e sem instruções contraditórias.
+Use apenas uma ação principal por cena.
+Adequar as cenas a vídeos de até 10 segundos (respeitando o tempo por cena escolhido: ${cena}).
+Quando houver interface, comando, configuração ou texto complexo, preferir representação visual simples e segura.
+Preservar a narração mesmo quando a cena precisar ser simplificada.
+
+8. ENTREGAS OBRIGATÓRIAS
+Depois de criar todas as cenas, produzir:
+
+TÍTULOS PARA O YOUTUBE
+Criar várias opções fiéis ao conteúdo, adequadas ao público de tecnologia e sem promessas falsas, explorando quando pertinente: curiosidade, medo/urgência, desejo de recompensa, surpresa e FOMO.
+
+DESCRIÇÃO SEO
+Criar descrição otimizada para YouTube em português brasileiro e incluir:
+“Inscreva-se no canal Entenda Tec: @entendatec”
+
+HASHTAGS
+Criar hashtags relevantes em português e relacionadas ao tema.
+
+TAGS DO YOUTUBE
+Criar aproximadamente 10 tags, separadas por vírgulas.
+
+PROMPT PARA THUMBNAIL
+Criar prompt de thumbnail de alto impacto, fiel ao conteúdo, com visual tecnológico, composição clara, forte contraste, elemento principal reconhecível, poucos elementos e texto curto exclusivamente em português brasileiro. Quando houver pessoas, usar expressão de curiosidade ou descoberta. Explorar curiosidade, medo/urgência, desejo de recompensa, surpresa e FOMO sem promessas falsas. O estilo visual da thumbnail deve ser coerente com: ${estiloStr}.
+
+9. PROCEDIMENTO
+Antes de gerar:
+1. Entenda o tema;
+2. Organize a narrativa;
+3. Divida o vídeo em cenas de até o tempo por cena escolhido (${cena});
+4. Garanta continuidade visual entre cenas;
+5. Escreva cada prompt de forma independente;
+6. Verifique toda narração em pt-BR;
+7. Verifique todos os textos visíveis em pt-BR;
+8. Evite cadernos de papel quando o tema mencionar computador notebook;
+9. Não invente informações técnicas;
+10. Separe cada prompt para facilitar copiar e colar;
+11. Separe a NARRAÇÃO da descrição visual da cena para que ela possa ser gerada separadamente no Google AI Studio.
+
+RESULTADO FINAL
+Entregue primeiro todas as cenas, cada uma separada e pronta para copiar/colar. Depois entregue títulos, descrição SEO, hashtags, tags e prompt de thumbnail.`;
+
+  document.getElementById('saida').textContent = prompt;
+
+  const promptChatGPT = `Você é o assistente de produção audiovisual do canal brasileiro Entenda Tec.
+
+Sua tarefa é transformar o PROMPT MESTRE abaixo em um pacote completo de produção de vídeo.
+
+IMPORTANTE:
+- Não altere o tema, o objetivo ou os fatos fornecidos.
+- Não invente especificações técnicas.
+- Quando uma informação não puder ser confirmada, mantenha a descrição genérica e tecnicamente segura.
+- Todo conteúdo textual deve estar em português brasileiro (pt-BR).
+- A narração deve estar separada da descrição visual.
+- Cada cena deve ter uma única ação principal.
+- As cenas devem manter continuidade visual de personagens, objetos, ambiente, iluminação e estilo.
+- Cada prompt de vídeo deve ser independente e pronto para copiar e colar no Google Flow.
+- Respeite rigorosamente a duração definida no Prompt Mestre.
+- Não coloque explicações desnecessárias dentro dos prompts finais.
+
+FORMATO OBRIGATÓRIO PARA O ENTENDA TEC:
+
+A resposta final deve ser dividida em exatamente quatro blocos usando estes marcadores, escritos sozinhos em uma linha:
+
+=== VIDEO ===
+Conteúdo das seções 1, 2 e 3, incluindo roteiro, continuidade visual e cenas para Google Flow.
+
+=== NARRACAO ===
+Reúna aqui somente as narrações de todas as cenas, em ordem, mantendo o texto completo e em pt-BR.
+
+=== IMAGENS ===
+Conteúdo da seção 4, incluindo os prompts de imagens e thumbnail.
+
+=== YOUTUBE ===
+Conteúdo das seções 5 a 10, incluindo títulos, descrição SEO, hashtags, tags, thumbnail e checklist final.
+
+Não remova informações para criar esses blocos. A resposta deve permanecer completa.
+Não coloque texto antes de === VIDEO === nem depois do conteúdo de === YOUTUBE ===.
+
+ORGANIZE A RESPOSTA EXATAMENTE NESTA ESTRUTURA:
+
+════════════════════════════════════
+1. ROTEIRO COMPLETO
+════════════════════════════════════
+
+Apresente o roteiro narrativo completo, em ordem, com começo, desenvolvimento e conclusão.
+
+════════════════════════════════════
+2. GUIA DE CONTINUIDADE VISUAL
+════════════════════════════════════
+
+Defina os elementos que precisam permanecer consistentes entre as cenas:
+- personagens;
+- objetos;
+- equipamentos;
+- ambiente;
+- iluminação;
+- paleta;
+- estilo visual;
+- aparência dos elementos tecnológicos.
+
+════════════════════════════════════
+3. CENAS PARA GOOGLE FLOW
+════════════════════════════════════
+
+Para cada cena use exatamente:
+
+CENA [NÚMERO]
+Duração: [duração]
+Objetivo: [objetivo da cena]
+
+PROMPT PARA O GOOGLE FLOW:
+[Prompt completo, independente e pronto para copiar e colar.]
+
+NARRAÇÃO DA CENA:
+[Somente o texto que deverá ser narrado.]
+
+INFORMAÇÃO VISUAL PRINCIPAL:
+[O que o espectador deve compreender visualmente.]
+
+ÁUDIO:
+[Orientações de voz, ambiente e efeitos sonoros, quando pertinentes.]
+
+IMPORTANTE:
+A NARRAÇÃO deve ficar fora do prompt visual principal para facilitar sua geração separada no Google AI Studio.
+
+════════════════════════════════════
+4. PROMPTS DE IMAGENS
+════════════════════════════════════
+
+Crie os prompts necessários para:
+- imagens de apoio;
+- ilustrações técnicas;
+- elementos visuais necessários;
+- thumbnail do YouTube.
+
+Cada prompt deve ser independente e pronto para copiar e colar.
+
+════════════════════════════════════
+5. TÍTULOS PARA YOUTUBE
+════════════════════════════════════
+
+Crie 5 opções de títulos para YouTube, fiéis ao conteúdo e sem promessas falsas.
+
+Regras:
+- Priorize clareza, curiosidade e relevância para pesquisa.
+- Use palavras-chave realmente relacionadas ao tema.
+- Evite títulos genéricos, exagerados ou sensacionalistas.
+- Não invente informações que não estejam no Prompt Mestre.
+- Não use clickbait enganoso.
+- Mantenha os títulos naturais e adequados ao público brasileiro.
+- Varie a construção dos títulos para que sejam opções realmente diferentes.
+- Não coloque emojis nos títulos, a menos que façam sentido para o tema.
+
+Apresente os 5 títulos numerados.
+
+════════════════════════════════════
+6. DESCRIÇÃO SEO
+════════════════════════════════════
+
+Crie uma descrição completa e pronta para publicação no YouTube, em português brasileiro.
+
+A descrição deve:
+- apresentar claramente o assunto do vídeo logo no início;
+- explicar de forma natural o que o espectador encontrará no conteúdo;
+- utilizar palavras-chave realmente relacionadas ao tema;
+- distribuir as palavras-chave naturalmente, sem repetição artificial;
+- destacar informações importantes apresentadas no vídeo;
+- manter linguagem clara, objetiva e adequada ao público brasileiro;
+- incluir uma chamada natural para inscrição no canal;
+- não inventar informações que não estejam no Prompt Mestre;
+- não fazer promessas que o vídeo não cumpra;
+- não utilizar excesso de emojis.
+
+Inclua obrigatoriamente esta chamada:
+“Inscreva-se no canal Entenda Tec: @entendatec”
+
+Entregue somente a descrição final, pronta para copiar e colar no YouTube.
+
+════════════════════════════════════
+7. HASHTAGS
+════════════════════════════════════
+
+Crie de 5 a 8 hashtags relevantes e diretamente relacionadas ao tema do vídeo.
+
+Regras:
+- Use somente hashtags relacionadas ao conteúdo real do vídeo.
+- Priorize termos que o público brasileiro possa utilizar para encontrar esse assunto.
+- Combine hashtags específicas do tema com algumas hashtags gerais do nicho.
+- Não repita hashtags com pequenas variações.
+- Não invente nomes, tecnologias, produtos ou assuntos que não apareçam no conteúdo.
+- Não use hashtags genéricas demais quando não tiverem relação direta com o vídeo.
+- Apresente todas as hashtags em uma única linha, separadas por espaços.
+
+════════════════════════════════════
+8. TAGS DO YOUTUBE
+════════════════════════════════════
+
+Crie aproximadamente 10 tags de pesquisa relacionadas diretamente ao tema do vídeo.
+
+Regras:
+- Use palavras e expressões que realmente tenham relação com o conteúdo.
+- Combine termos principais, termos específicos e variações naturais de pesquisa.
+- Considere como um espectador brasileiro poderia pesquisar esse assunto no YouTube.
+- Evite repetir exatamente as mesmas expressões.
+- Não invente tecnologias, produtos, pessoas, fatos ou assuntos.
+- Não use tags genéricas sem relação direta com o conteúdo.
+- Não inclua hashtags (#).
+- Entregue todas as tags em uma única linha, separadas por vírgulas.
+
+════════════════════════════════════
+9. THUMBNAIL
+════════════════════════════════════
+
+Crie um prompt completo e pronto para uso em um gerador de imagens para produzir a thumbnail do YouTube.
+
+O prompt deve definir:
+- assunto principal da thumbnail;
+- elemento visual principal em destaque;
+- composição e enquadramento;
+- ambiente ou fundo coerente com o tema;
+- iluminação e atmosfera;
+- contraste suficiente para destacar o elemento principal;
+- estilo visual coerente com o projeto;
+- composição limpa, evitando excesso de elementos;
+- espaço visual adequado para texto;
+- formato horizontal 16:9;
+- aparência profissional e adequada para uma thumbnail de YouTube.
+
+Inclua também:
+TEXTO SUGERIDO PARA A THUMBNAIL:
+Uma frase curta, clara e relacionada diretamente ao tema, preferencialmente com poucas palavras.
+
+Regras:
+- Não invente informações que não estejam no conteúdo.
+- Não use texto sensacionalista ou enganoso.
+- Não coloque excesso de texto na imagem.
+- O prompt deve ser independente e pronto para copiar e colar.
+
+════════════════════════════════════
+10. CHECKLIST FINAL
+════════════════════════════════════
+
+Antes de finalizar, confira:
+- [ ] Tema preservado
+- [ ] Objetivo preservado
+- [ ] Informações técnicas preservadas
+- [ ] Todas as cenas dentro da duração definida
+- [ ] Uma ação principal por cena
+- [ ] Continuidade visual entre cenas
+- [ ] Narração separada do prompt visual
+- [ ] Narração em pt-BR
+- [ ] Textos visíveis em pt-BR
+- [ ] Prompts prontos para copiar e colar
+- [ ] Não foram inventadas informações técnicas
+- [ ] Thumbnail coerente com o tema
+
+NÃO RESUMA O RESULTADO.
+Entregue o pacote completo.
+
+A seguir está o PROMPT MESTRE que deve ser transformado:
+
+────────────────────────────────────
+${prompt}
+────────────────────────────────────
+
+Agora transforme esse Prompt Mestre no pacote completo de produção seguindo rigorosamente todas as instruções acima.`;
+
+  document.getElementById('saida-chatgpt').textContent = promptChatGPT;
+
+  document.getElementById('status').textContent = 'Prompt Mestre + ChatGPT preparados ✓';
+}
+
+let resultadoAtual = 'mestre';
+
+function organizarRespostaChatGPT() {
+  const campo = document.getElementById('resposta-chatgpt');
+  const resposta = campo ? campo.value.trim() : '';
+
+  if (!resposta) {
+    document.getElementById('status').textContent = 'Cole primeiro a resposta do ChatGPT';
+    return;
+  }
+
+  const inicioVideo = resposta.indexOf('=== VIDEO ===');
+  const inicioNarracao = resposta.indexOf('=== NARRACAO ===');
+  const inicioImagens = resposta.indexOf('=== IMAGENS ===');
+  const inicioYoutube = resposta.indexOf('=== YOUTUBE ===');
+
+  if (
+    inicioVideo === -1 ||
+    inicioNarracao === -1 ||
+    inicioImagens === -1 ||
+    inicioYoutube === -1
+  ) {
+    document.getElementById('status').textContent =
+      'Não foi possível identificar os quatro blocos da resposta';
+    return;
+  }
+
+  if (
+    !(inicioVideo < inicioNarracao &&
+      inicioNarracao < inicioImagens &&
+      inicioImagens < inicioYoutube)
+  ) {
+    document.getElementById('status').textContent =
+      'A ordem dos blocos da resposta não está correta';
+    return;
+  }
+
+  const video = resposta
+    .slice(inicioVideo + '=== VIDEO ==='.length, inicioNarracao)
+    .trim();
+
+  const narracao = resposta
+    .slice(inicioNarracao + '=== NARRACAO ==='.length, inicioImagens)
+    .trim();
+
+  const imagens = resposta
+    .slice(inicioImagens + '=== IMAGENS ==='.length, inicioYoutube)
+    .trim();
+
+  const youtube = resposta
+    .slice(inicioYoutube + '=== YOUTUBE ==='.length)
+    .trim();
+
+  document.getElementById('saida-video').textContent = video;
+  document.getElementById('saida-narracao').textContent = narracao;
+  document.getElementById('saida-imagem').textContent = imagens;
+
+  document.getElementById('saida-video').classList.remove('result-empty');
+  document.getElementById('saida-narracao').classList.remove('result-empty');
+  document.getElementById('saida-imagem').classList.remove('result-empty');
+
+  const saidaYoutube = document.getElementById('saida-youtube');
+
+  if (saidaYoutube) {
+    saidaYoutube.textContent = youtube;
+    saidaYoutube.classList.remove('result-empty');
+  }
+
+  document.getElementById('status').textContent =
+    'Resposta organizada nas abas Vídeo, Narração, Imagens e YouTube ✓';
+
+  selecionarResultado('video');
+}
+
+function limparRespostaChatGPT() {
+  const campo = document.getElementById('resposta-chatgpt');
+
+  if (campo) {
+    campo.value = '';
+  }
+
+  document.getElementById('status').textContent = 'Resposta do ChatGPT limpa';
+}
+
+function selecionarResultado(secao) {
+  resultadoAtual = secao;
+
+  const nomesSecoes = {
+    mestre: 'Prompt Mestre',
+    video: 'Vídeo',
+    narracao: 'Narração',
+    imagem: 'Imagens',
+    youtube: 'YouTube',
+    chatgpt: 'ChatGPT'
+  };
+
+  const indicador = document.getElementById('secao-atual');
+
+  if (indicador) {
+    indicador.textContent = nomesSecoes[secao] || secao;
+  }
+
+  document.querySelectorAll('.result-tab').forEach(tab => {
+    tab.classList.toggle(
+      'active',
+      tab.dataset.resultTab === secao
+    );
+  });
+
+  document.querySelectorAll('.result-section').forEach(section => {
+    section.classList.toggle(
+      'active',
+      section.id === 'resultado-' + secao
+    );
+  });
+}
+
+function obterTextoResultado(secao = resultadoAtual) {
+  const mapa = {
+    mestre: 'saida',
+    video: 'saida-video',
+    narracao: 'saida-narracao',
+    imagem: 'saida-imagem',
+    youtube: 'saida-youtube',
+    chatgpt: 'saida-chatgpt'
+  };
+
+  const id = mapa[secao] || mapa.mestre;
+  return document.getElementById(id)?.textContent?.trim() || '';
+}
+
+async function copiarResultadoAtual() {
+  const texto = obterTextoResultado();
+
+  if (!texto) {
+    document.getElementById('status').textContent = 'Nada para copiar';
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(texto);
+    document.getElementById('status').textContent = 'Seção copiada ✓';
+  } catch (erro) {
+    console.error('Não foi possível copiar a seção:', erro);
+    document.getElementById('status').textContent = 'Erro ao copiar';
+    alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.');
+  }
+}
+
+async function salvarResultadoAtual() {
+  const nomes = {
+    mestre: 'prompt-mestre',
+    video: 'prompts-video',
+    narracao: 'narracao',
+    imagem: 'prompts-imagem',
+    youtube: 'youtube',
+    chatgpt: 'prompt-chatgpt'
+  };
+
+  const texto = obterTextoResultado();
+
+  if (!texto) {
+    document.getElementById('status').textContent = 'Nada para salvar';
+    return;
+  }
+
+  const nomeBase = nomes[resultadoAtual] || 'resultado';
+  const nomeArquivo = nomeBase + '.txt';
+
+  try {
+    if (window.entendaTec && typeof window.entendaTec.salvarTexto === 'function') {
+      const resultado = await window.entendaTec.salvarTexto(texto, nomeArquivo);
+
+      if (resultado.sucesso) {
+        document.getElementById('status').textContent = 'Seção salva ✓';
+      } else if (!resultado.cancelado) {
+        alert('Não foi possível salvar o arquivo: ' + (resultado.erro || 'erro desconhecido'));
+      }
+
+      return;
+    }
+
+    baixarBlob(texto, 'text/plain;charset=utf-8', nomeArquivo);
+    document.getElementById('status').textContent = 'Seção baixada ✓';
+
+  } catch (erro) {
+    alert('Erro ao salvar a seção: ' + erro.message);
+  }
+}
+
+async function copiar() {
+
+  const saida = document.getElementById('saida');
+  const status = document.getElementById('status');
+  const texto = saida?.textContent?.trim() || '';
+
+  const mensagemInicial = 'Preencha o tema e o objetivo e clique em “Gerar Prompt Mestre”.';
+
+  if (!texto || texto === mensagemInicial) {
+    status.textContent = 'Gere o Prompt Mestre primeiro';
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(texto);
+    status.textContent = 'Copiado ✓';
+  } catch (erro) {
+    console.error('Não foi possível copiar o prompt:', erro);
+    status.textContent = 'Erro ao copiar';
+    alert('Não foi possível copiar o prompt automaticamente. Selecione o texto e copie manualmente.');
+  }
+}
+
+
+
+function abrirAjuda(){
+  document.getElementById('ajuda').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function fecharAjuda(){
+  document.getElementById('ajuda').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+async function carregarVersao(){
+  try {
+    const versao = await window.entendaTec.obterVersao();
+    const elemento = document.getElementById('numero-versao');
+    if (elemento) elemento.textContent = versao;
+  } catch (erro) {
+    console.error('Não foi possível obter a versão do aplicativo:', erro);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', carregarVersao);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') fecharAjuda();
+});
+
+
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('btnInstall');
+  if (btn) btn.style.display = 'inline-block';
+});
+async function instalarApp(){
+  if (!deferredPrompt) {
+    alert('Para instalar: no Chrome/Edge use o ícone de instalação na barra de endereço, ou no celular use “Adicionar à tela inicial”.\\n\\nSe abriu pelo arquivo local (file://), sirva a pasta por um servidor local para habilitar a instalação automática.');
+    return;
+  }
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  const btn = document.getElementById('btnInstall');
+  if (btn) btn.style.display = 'none';
+}
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  const btn = document.getElementById('btnInstall');
+  if (btn) btn.style.display = 'none';
+});
+
+
+
+
+
+function nomeArquivoSeguro(nome, extensao) {
+  let n = (nome || '').trim();
+  if (!n) n = 'arquivo';
+  // remove caracteres inválidos em nomes de arquivo
+  n = n.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim();
+  if (!n.toLowerCase().endsWith('.' + extensao.toLowerCase())) {
+    n = n.replace(/\.[^.]+$/, '') + '.' + extensao;
+  }
+  return n;
+}
+
+function pedirNomeArquivo(padrao, extensao) {
+  const sugerido = padrao;
+  const resposta = window.prompt('Nome do arquivo para salvar:', sugerido);
+  if (resposta === null) return null; // cancelou
+  return nomeArquivoSeguro(resposta, extensao);
+}
+
+function baixarBlob(conteudo, mime, nomeArquivo) {
+  const blob = new Blob([conteudo], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nomeArquivo;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+async function exportarProjetoCompleto() {
+  const status = document.getElementById('status');
+
+  const secoes = [
+    { id: 'resultado-mestre', nome: '01-prompt-mestre.txt' },
+    { id: 'resultado-video', nome: '02-prompts-video.txt' },
+    { id: 'resultado-narracao', nome: '03-narracao.txt' },
+    { id: 'resultado-imagem', nome: '04-prompts-imagem.txt' },
+    { id: 'resultado-youtube', nome: '05-youtube.txt' },
+    { id: 'resultado-chatgpt', nome: '06-prompt-chatgpt.txt' }
+  ];
+
+  const arquivos = [];
+
+  for (const secao of secoes) {
+    const elemento = document.getElementById(secao.id);
+
+    if (elemento) {
+      const conteudo = elemento.innerText.trim();
+
+      if (conteudo) {
+        arquivos.push({
+          nome: secao.nome,
+          texto: conteudo
+        });
+      }
+    }
+  }
+
+  // Inclui também o HTML completo do aplicativo
+  arquivos.push({
+    nome: '07-aplicativo-EntendaTec.html',
+    texto: '<!DOCTYPE html>\n' + document.documentElement.outerHTML
+  });
+
+  if (arquivos.length === 0) {
+    if (status) status.textContent = 'Nada para exportar';
+    return;
+  }
+
+  const tema = (document.getElementById('tema')?.value || 'Projeto-Entenda-Tec')
+    .trim()
+    .slice(0, 50)
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, ' ');
+
+  const nomePadrao = tema || 'Projeto-Entenda-Tec';
+
+  try {
+    if (
+      window.entendaTec &&
+      typeof window.entendaTec.exportarProjeto === 'function'
+    ) {
+      if (status) status.textContent = 'Preparando exportação...';
+
+      const resultado = await window.entendaTec.exportarProjeto(
+        arquivos,
+        nomePadrao
+      );
+
+      if (resultado.sucesso) {
+        if (status) status.textContent = 'Projeto exportado ✓';
+        alert(
+          'Projeto exportado com sucesso!\\n\\nPasta: ' +
+          resultado.caminho
+        );
+      } else if (!resultado.cancelado) {
+        alert(
+          'Não foi possível exportar o projeto: ' +
+          (resultado.erro || 'erro desconhecido')
+        );
+        if (status) status.textContent = 'Erro na exportação';
+      }
+
+      return;
+    }
+
+    alert(
+      'A função de exportação do Electron não está disponível. ' +
+      'Verifique se o aplicativo foi reiniciado depois da alteração.'
+    );
+
+  } catch (erro) {
+    console.error('Erro ao exportar projeto:', erro);
+    alert('Erro ao exportar o projeto: ' + erro.message);
+    if (status) status.textContent = 'Erro na exportação';
+  }
+}
+
+async function baixarPrompt() {
+  const texto = document.getElementById('saida').textContent || '';
+
+  if (!texto.includes('PROMPT MESTRE')) {
+    alert('Gere o Prompt Mestre antes de salvar o .txt.\n\nPreencha tema e objetivo e clique em “Gerar Prompt Mestre”.');
+    return;
+  }
+
+  const tema = (document.getElementById('tema')?.value || 'prompt').trim().slice(0, 40);
+  const base = 'prompt-mestre-' + (tema || 'entenda-tec').replace(/[\\/:*?"<>|]+/g, '-');
+  const nomeArquivo = base + '.txt';
+
+  try {
+    if (window.entendaTec && typeof window.entendaTec.salvarTexto === 'function') {
+      const resultado = await window.entendaTec.salvarTexto(texto, nomeArquivo);
+
+      if (resultado.sucesso) {
+        document.getElementById('status').textContent = 'Prompt .txt salvo ✓';
+      } else if (!resultado.cancelado) {
+        alert('Não foi possível salvar o arquivo: ' + (resultado.erro || 'erro desconhecido'));
+      }
+      return;
+    }
+
+    baixarBlob(texto, 'text/plain;charset=utf-8', nomeArquivo);
+    document.getElementById('status').textContent = 'Prompt .txt baixado ✓';
+
+  } catch (erro) {
+    alert('Erro ao salvar o arquivo: ' + erro.message);
+  }
+}
+
+async function baixarHtml() {
+  const content = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const nomeArquivo = 'Prompt_Mestre_Entenda_Tec_v3.0.html';
+
+  try {
+    if (window.entendaTec && typeof window.entendaTec.salvarTexto === 'function') {
+      const resultado = await window.entendaTec.salvarTexto(content, nomeArquivo);
+
+      if (resultado.sucesso) {
+        const st = document.getElementById('status');
+        if (st) st.textContent = 'App HTML salvo ✓';
+      } else if (!resultado.cancelado) {
+        alert('Não foi possível salvar o HTML: ' + (resultado.erro || 'erro desconhecido'));
+      }
+      return;
+    }
+
+    baixarBlob(content, 'text/html;charset=utf-8', nomeArquivo);
+
+    const st = document.getElementById('status');
+    if (st) st.textContent = 'App HTML baixado ✓';
+
+  } catch (erro) {
+    alert('Erro ao salvar o HTML: ' + erro.message);
+  }
+}
+
+// ========================================
+// SALVAMENTO AUTOMÁTICO DO FORMULÁRIO
+// ========================================
+const CHAVE_RASCUNHO = 'entendaTec.rascunho.v1';
+
+function salvarRascunho() {
+  try {
+    const dados = {
+      tema: document.getElementById('tema').value,
+      objetivo: document.getElementById('objetivo').value,
+      total: document.getElementById('total').value,
+      cena: document.getElementById('cena').value,
+      nivel: document.getElementById('nivel').value,
+      info: document.getElementById('info').value,
+      obs: document.getElementById('obs').value,
+      tom: selectedChips('tom'),
+      estilo: selectedChips('estilo')
+    };
+
+    localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify(dados));
+  } catch (erro) {
+    console.error('Não foi possível salvar o rascunho:', erro);
+  }
+}
+
+function restaurarRascunho() {
+  try {
+    const texto = localStorage.getItem(CHAVE_RASCUNHO);
+    if (!texto) return;
+
+    const dados = JSON.parse(texto);
+
+    ['tema', 'objetivo', 'total', 'cena', 'nivel', 'info', 'obs']
+      .forEach(id => {
+        if (typeof dados[id] === 'string') {
+          document.getElementById(id).value = dados[id];
+        }
+      });
+
+    if (Array.isArray(dados.tom)) {
+      document.querySelectorAll('#tom .chip').forEach(chip => {
+        chip.classList.toggle('active', dados.tom.includes(chip.textContent.trim()));
+      });
+    }
+
+    if (Array.isArray(dados.estilo)) {
+      document.querySelectorAll('#estilo .chip').forEach(chip => {
+        chip.classList.toggle('active', dados.estilo.includes(chip.textContent.trim()));
+      });
+    }
+  } catch (erro) {
+    console.error('Não foi possível restaurar o rascunho:', erro);
+  }
+}
+
+let temporizadorRascunho;
+
+function agendarSalvamento() {
+  clearTimeout(temporizadorRascunho);
+  temporizadorRascunho = setTimeout(salvarRascunho, 250);
+}
+
+document.addEventListener('input', agendarSalvamento);
+document.addEventListener('change', agendarSalvamento);
+
+document.querySelectorAll('.chips.multi').forEach(grupo => {
+  grupo.addEventListener('click', evento => {
+    if (evento.target.classList.contains('chip')) {
+      agendarSalvamento();
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', restaurarRascunho);
+
+</script>
+</body>
+</html>

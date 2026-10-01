@@ -1,0 +1,50 @@
+{
+  "name": "entendatec",
+  "version": "1.0.4",
+  "description": "Aplicativo desktop para criar prompts do canal Entenda Tec",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dist:deb": "electron-builder --linux deb",
+    "dist:appimage": "electron-builder --linux AppImage",
+    "dist:win": "electron-builder --win nsis"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Entenda Tec",
+    "email": "marcelo@example.org"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "productName": "Entenda Tec",
+  "build": {
+    "appId": "br.com.entendatec.promptmestre",
+    "productName": "Entenda Tec",
+    "executableName": "entendatec",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "Prompt_Mestre_Entenda_Tec_v3.0.html",
+      "package.json"
+    ],
+    "linux": {
+      "category": "Utility",
+      "target": [
+        "deb",
+        "AppImage"
+      ],
+      "maintainer": "Entenda Tec <marcelo@example.org>",
+      "icon": "build/icons",
+      "syncDesktopName": true
+    }
+  },
+  "homepage": "https://example.org/entendatec",
+  "desktopName": "br.com.entendatec.promptmestre"
+}

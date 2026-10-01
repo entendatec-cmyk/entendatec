@@ -1,0 +1,27 @@
+node_modules/
+release/
+
+# Backups e arquivos temporários
+*.final
+*.antes-windows
+*.backup
+*.backup.html
+*.bak
+*.bak-*
+*.estavel-*
+*.seguro
+*.testado
+*.help-backup
+*.interface-backup
+*.leitura-backup
+*.ui2-backup
+*.youtube-backup
+backup/
+
+# Logs e arquivos do sistema
+*.log
+.DS_Store
+
+# Backups com sufixos específicos
+*-backup
+*-backup.*
