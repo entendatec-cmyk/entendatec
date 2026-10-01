@@ -6,6 +6,8 @@ O aplicativo ajuda a transformar uma ideia em um projeto estruturado, reunindo p
 
 ---
 
+![Interface do Entenda Tec](assets/entendatec-interface.png)
+
 ## 🚀 Download
 
 A versão mais recente disponível para testes é a **v1.0.4**.
